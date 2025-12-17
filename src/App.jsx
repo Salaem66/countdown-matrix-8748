@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const App = () => {
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
+  const audioRef = useRef(null);
 
   useEffect(() => {
     let interval;
@@ -20,8 +21,15 @@ const App = () => {
     if (time === 0) {
       setIsFinished(true);
       setIsRunning(false);
+      playBip();
     }
   }, [time]);
+
+  const playBip = () => {
+    if (audioRef.current) {
+      audioRef.current.play();
+    }
+  };
 
   const handleStart = () => {
     setIsRunning(true);
@@ -46,8 +54,19 @@ const App = () => {
     setIsFinished(false);
   };
 
+  const handleCustomTime = (e) => {
+    const customTime = parseInt(e.target.value);
+    if (!isNaN(customTime) && customTime > 0) {
+      setTime(customTime);
+      setIsRunning(false);
+      setIsPaused(false);
+      setIsFinished(false);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-black text-green-500 font-mono">
+      <audio ref={audioRef} src="/bip.mp3" />
       <div className="text-4xl mb-8">
         {Math.floor(time / 60)}:{String(time % 60).padStart(2, '0')}
       </div>
@@ -96,6 +115,12 @@ const App = () => {
         >
           10 min
         </button>
+        <input
+          type="number"
+          className="px-4 py-2 rounded-md bg-transparent border border-green-500 focus:outline-none"
+          placeholder="Custom time (seconds)"
+          onChange={handleCustomTime}
+        />
       </div>
       {isFinished && (
         <div className="mt-8 text-red-500 animate-blink">
